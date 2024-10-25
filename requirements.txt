@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pypdf
+python-dotenv
+pinecone
+transformers==4.45.2
+langchain==0.3.4
+langchain-community
+langchain-pinecone
+langchain-huggingface
