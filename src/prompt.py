@@ -11,9 +11,9 @@ DEFAULT_SYSTEM_PROMPT = """
 
 def generate_prompt(prompt: str, system_prompt: str = DEFAULT_SYSTEM_PROMPT) -> str:
     return f"""
-        [INST] <>
-        {system_prompt}
-        <>
+            [INST] <>
+            {system_prompt}
+            <>
 
-        {prompt} [/INST]
+            {prompt} [/INST]
         """.strip()
