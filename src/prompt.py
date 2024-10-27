@@ -1,3 +1,4 @@
+
 DEFAULT_SYSTEM_PROMPT = """
     You are an assistant for question-answering tasks.
     Use the following pieces of retrieved context to answer
@@ -17,3 +18,6 @@ def generate_prompt(prompt: str, system_prompt: str = DEFAULT_SYSTEM_PROMPT) -> 
 
             {prompt} [/INST]
         """.strip()
+
+
+

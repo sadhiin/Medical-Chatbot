@@ -9,3 +9,5 @@ langchain-community
 langchain-pinecone
 langchain-huggingface
 huggingface_hub
+jinja2
+aiohttp
