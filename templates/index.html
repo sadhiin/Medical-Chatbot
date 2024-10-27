@@ -321,7 +321,7 @@
 
                 try {
                     // Simulate network delay for demo purposes
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    // await new Promise(resolve => setTimeout(resolve, 1000));
 
                     // Send message to FastAPI backend
                     const response = await fetch('/api/chat', {
@@ -329,11 +329,11 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ message }),
+                        body: JSON.stringify({'message': message }),
                     });
 
                     const data = await response.json();
-
+                    console.log(data);
                     // Hide typing indicator
                     typingIndicator.classList.remove('active');
 

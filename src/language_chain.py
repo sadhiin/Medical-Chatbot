@@ -11,13 +11,6 @@ from src.prompt import generate_prompt
 
 logger = setup_logger(__name__, 'logs/large_language_model.log')
 
-
-
-
-
-# streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
-
-
 class LargeLanguageModel():
     def __init__(self, model_name_hf_id="TheBloke/Llama-2-13B-chat-GPTQ", model_basename='model', revision_ckpt='gptq-4bit-128g-actorder_True'):
         self.DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

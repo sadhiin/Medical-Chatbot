@@ -5,8 +5,10 @@ from fastapi.templating import Jinja2Templates
 # importing cros origin resource
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+from pydantic import BaseModel
+from src.utils import setup_logger
 
-
+logging = setup_logger(__name__, 'logs/main.log')
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -24,6 +26,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
+class UserText(BaseModel):
+    message: str
+
 @app.get("/")
 async def root(request: Request):
     return templates.TemplateResponse(
@@ -31,8 +38,10 @@ async def root(request: Request):
     )
 
 @app.post('/api/chat')
-async def chat_bot():
+async def chat_bot(usertext: UserText):
+
+    logging.info('resived the request {}'.format(usertext.message))
     return {"bot": "Hello World"}
 
 if __name__=="__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True, workers=2)
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True, workers=3)
