@@ -5,10 +5,10 @@ from auto_gptq import AutoGPTQForCausalLM
 from transformers import pipeline, TextStreamer
 from langchain import HuggingFacePipeline, PromptTemplate
 from langchain.chains import RetrievalQA
-import gc
 from src.utils import setup_logger
 from src.prompt import generate_prompt
 from src.vectordb import VectorDB
+import gc
 
 logger = setup_logger(__name__, 'logs/large_language_model.log')
 
@@ -24,6 +24,8 @@ class LargeLanguageModel():
         torch.cuda.empty_cache()
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path, use_fast=True)
+        gc.collect()
+        torch.cuda.empty_cache()
 
         self.model = AutoGPTQForCausalLM.from_quantized(
             model_name_or_path=self.model_name_or_path,
@@ -33,9 +35,10 @@ class LargeLanguageModel():
             trust_remote_code=True,
             inject_fused_attention=False,
             device=self.DEVICE,
-            quantize_config=None,
-        )
-
+            quantize_config=None
+            )
+        gc.collect()
+        torch.cuda.empty_cache()
         self.streamer = TextStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
 
 
@@ -77,4 +80,9 @@ class MedicalChatbot():
             )
 
     def answer_question(self, question) -> str:
-        return self.qa_chain.run(question)
+        return self.qa_chain.invoke({"query": question})
+
+
+if __name__ == "__main__":
+    medical_chatbot = MedicalChatbot()
+    print(medical_chatbot.answer_question("What is the treatment for diabetes?"))

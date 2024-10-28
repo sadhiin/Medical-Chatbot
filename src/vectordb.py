@@ -8,9 +8,11 @@ from langchain_huggingface import HuggingFaceEmbeddings
 class VectorDB():
     def __init__(self, index_name:str ="medibot-index", HF_Embedding_model:str='microsoft/unixcoder-base'):
         load_dotenv()
+        self.api_key = os.getenv("PINECONE_API_KEY")
+        assert self.api_key is not None, "PINECONE_API_KEY is not set"
         self.index_name = index_name
         self.embed_size = 0
-        self.pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+        self.pc = Pinecone(api_key=self.api_key)
         self.HF_Embedding_model = HF_Embedding_model
         self.embedding_model = None
         self.__download_embedding_model()
