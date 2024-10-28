@@ -1,10 +1,23 @@
 body {
     background-color: #1a1a2e;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
 }
 
 .chat-container {
-    height: calc(100vh - 180px);
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     background-color: #162447;
+    margin-bottom: 1rem;
 }
 
 .message {

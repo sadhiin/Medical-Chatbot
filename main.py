@@ -15,17 +15,19 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 origins = [
+    "http://localhost:8000",
     "http://localhost:8080",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:8080",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["chat_bot"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 
 class UserText(BaseModel):
@@ -39,9 +41,8 @@ async def root(request: Request):
 
 @app.post('/api/chat')
 async def chat_bot(usertext: UserText):
-
-    logging.info('resived the request {}'.format(usertext.message))
-    return {"bot": "Hello World"}
+    logging.info('received the request {}'.format(usertext.message))
+    return {"response": "Hello World"}  # Changed from "bot" to "response"
 
 if __name__=="__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True, workers=3)
