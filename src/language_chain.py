@@ -8,6 +8,7 @@ from langchain.chains import RetrievalQA
 import gc
 from src.utils import setup_logger
 from src.prompt import generate_prompt
+from src.vectordb import VectorDB
 
 logger = setup_logger(__name__, 'logs/large_language_model.log')
 
@@ -58,19 +59,19 @@ class LargeLanguageModel():
 
 
 class MedicalChatbot():
-    def __init__(self, vector_database):
+    def __init__(self):
         self.prompt = PromptTemplate(
             template=generate_prompt(
                 prompt="""
                 Question: {question}
                 """),
             input_variables=["question"])
-
+        self.vector_database = VectorDB().get_index()
         self.llm = LargeLanguageModel()
         self.qa_chain = RetrievalQA.from_chain_type(
             llm = self.llm.get_llm(),
             chain_type="stuff",
-            retriever= vector_database.as_retriever(search_type="similarity", search_kwargs={"k":3}),
+            retriever= self.vector_database.as_retriever(search_type="similarity", search_kwargs={"k":3}),
             return_source_documents=True,
             chain_type_kwargs={"prompt": self.prompt},
             )

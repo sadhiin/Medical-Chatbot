@@ -8,6 +8,8 @@ import uvicorn
 from pydantic import BaseModel
 from src.utils import setup_logger
 
+from src.language_chain import MedicalChatbot
+
 logging = setup_logger(__name__, 'logs/main.log')
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -42,6 +44,9 @@ async def root(request: Request):
 @app.post('/api/chat')
 async def chat_bot(usertext: UserText):
     logging.info('received the request {}'.format(usertext.message))
+
+    medical_chatbot = MedicalChatbot(vector_database)
+
     return {"response": "Hello World"}  # Changed from "bot" to "response"
 
 if __name__=="__main__":
