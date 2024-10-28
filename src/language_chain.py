@@ -9,37 +9,58 @@ from src.utils import setup_logger
 from src.prompt import generate_prompt
 from src.vectordb import VectorDB
 import gc
+import os
 
 logger = setup_logger(__name__, 'logs/large_language_model.log')
 
 class LargeLanguageModel():
     def __init__(self, model_name_hf_id="TheBloke/Llama-2-13B-chat-GPTQ", model_basename='model', revision_ckpt='gptq-4bit-128g-actorder_True'):
+        # Set PyTorch memory allocation configuration
+        torch.cuda.set_per_process_memory_fraction(0.9)  # Use only 90% of available GPU memory
+        os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+
         self.DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model_name_or_path = model_name_hf_id
         self.model_basename = model_basename
         self.revision_ckpt = revision_ckpt
 
         logger.info(f"Using device: {self.DEVICE}")
+
+        # Clear memory before loading model
         gc.collect()
         torch.cuda.empty_cache()
 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path, use_fast=True)
-        gc.collect()
-        torch.cuda.empty_cache()
-
-        self.model = AutoGPTQForCausalLM.from_quantized(
-            model_name_or_path=self.model_name_or_path,
-            revision=self.revision_ckpt,
-            model_basename=model_basename,
-            use_safetensors=True,
-            trust_remote_code=True,
-            inject_fused_attention=False,
-            device=self.DEVICE,
-            quantize_config=None
+        try:
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                self.model_name_or_path,
+                use_fast=True,
+                trust_remote_code=True
             )
-        gc.collect()
-        torch.cuda.empty_cache()
-        self.streamer = TextStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
+
+            gc.collect()
+            torch.cuda.empty_cache()
+
+            self.model = AutoGPTQForCausalLM.from_quantized(
+                model_name_or_path=self.model_name_or_path,
+                revision=self.revision_ckpt,
+                model_basename=model_basename,
+                use_safetensors=True,
+                trust_remote_code=True,
+                inject_fused_attention=False,
+                device=self.DEVICE,
+                quantize_config=None,
+                use_cache=True,
+                low_cpu_mem_usage=True
+            )
+
+            gc.collect()
+            torch.cuda.empty_cache()
+
+            self.streamer = TextStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
+
+        except Exception as e:
+            logger.error(f"Error initializing model: {str(e)}")
+            raise
 
 
     def __get_pipeline(self):
