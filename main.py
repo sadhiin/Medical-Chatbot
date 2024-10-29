@@ -45,9 +45,9 @@ async def root(request: Request):
 async def chat_bot(usertext: UserText):
     logging.info('received the request {}'.format(usertext.message))
 
-    medical_chatbot = MedicalChatbot(vector_database)
-
-    return {"response": "Hello World"}  # Changed from "bot" to "response"
+    medical_chatbot = MedicalChatbot()
+    response = medical_chatbot.answer_question(usertext.message)
+    return {"response": response}
 
 if __name__=="__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True, workers=3)
