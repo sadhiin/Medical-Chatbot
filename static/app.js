@@ -66,7 +66,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Add bot response (make sure we're using the correct property)
             if (data && data.response) {
-                appendMessage('bot', data.response);
+                // if (data.response.source_documents.length > 0) {
+                //     appendMessage('bot', data.response.result);
+                //     appendMessage('bot', data.response.source_documents);
+                // } else {
+                //     appendMessage('bot', data.response.result);
+                // }
+                appendMessage('bot', data.response.result);
+                // appendMessage('bot', 'There is some issue on backend side, please try again later.')
             } else {
                 appendMessage('bot', 'Sorry, I received an invalid response format.');
             }

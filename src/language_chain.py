@@ -57,7 +57,7 @@ class LargeLanguageModel():
             gc.collect()
             torch.cuda.empty_cache()
 
-            self.streamer = TextStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
+            # self.streamer = TextStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
 
         except Exception as e:
             logger.error(f"Error initializing model: {str(e)}")
@@ -73,7 +73,7 @@ class LargeLanguageModel():
             temperature=0.2,
             top_p=0.95,
             repetition_penalty=1.15,
-            streamer=self.streamer,
+            # streamer=self.streamer,
         )
         return HuggingFacePipeline(pipeline=text_pipeline, model_kwargs={"temperature": 0.2})
 
@@ -84,22 +84,32 @@ class LargeLanguageModel():
 
 
 class MedicalChatbot():
+    _instance = None
+    _initialized = False
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(MedicalChatbot, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self):
-        self.prompt = PromptTemplate(
-            template=generate_prompt(
-                prompt="""
-                Question: {question}
-                """),
-            input_variables=["question"])
-        self.vector_database = VectorDB().get_index()
-        self.llm = LargeLanguageModel()
-        self.qa_chain = RetrievalQA.from_chain_type(
-            llm = self.llm.get_llm(),
-            chain_type="stuff",
-            retriever= self.vector_database.as_retriever(search_type="similarity", search_kwargs={"k":3}),
-            return_source_documents=True,
-            chain_type_kwargs={"prompt": self.prompt},
+        if not MedicalChatbot._initialized:
+            self.prompt = PromptTemplate(
+                template=generate_prompt(
+                    prompt="""
+                    Question: {question}
+                    """),
+                input_variables=["question"])
+            self.vector_database = VectorDB().get_index()
+            self.llm = LargeLanguageModel()
+            self.qa_chain = RetrievalQA.from_chain_type(
+                llm=self.llm.get_llm(),
+                chain_type="stuff",
+                retriever=self.vector_database.as_retriever(search_type="similarity", search_kwargs={"k": 3}),
+                return_source_documents=True,
+                chain_type_kwargs={"prompt": self.prompt},
             )
+            MedicalChatbot._initialized = True
 
     def answer_question(self, question) -> str:
         return self.qa_chain.invoke({"query": question})

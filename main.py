@@ -4,9 +4,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 # importing cros origin resource
 from fastapi.middleware.cors import CORSMiddleware
+import torch
 import uvicorn
 from pydantic import BaseModel
-from src.utils import setup_logger
+from src.utils import setup_logger, process_response
 
 from src.language_chain import MedicalChatbot
 
@@ -31,6 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+medical_chatbot = MedicalChatbot()  # Initialize once at startup
 
 class UserText(BaseModel):
     message: str
@@ -44,11 +46,17 @@ async def root(request: Request):
 @app.post('/api/chat')
 async def chat_bot(usertext: UserText):
     logging.info('received the request {}'.format(usertext.message))
-
-    medical_chatbot = MedicalChatbot()
     response = medical_chatbot.answer_question(usertext.message)
     logging.info('response {}'.format(response))
-    return {"response": response}
+    processed_response = process_response(response)
+    return {'response': processed_response}
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    # Clean up resources
+    if medical_chatbot.llm:
+        del medical_chatbot.llm.model
+        torch.cuda.empty_cache()
 
 if __name__=="__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True, workers=3)
