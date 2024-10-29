@@ -47,6 +47,7 @@ async def chat_bot(usertext: UserText):
 
     medical_chatbot = MedicalChatbot()
     response = medical_chatbot.answer_question(usertext.message)
+    logging.info('response {}'.format(response))
     return {"response": response}
 
 if __name__=="__main__":

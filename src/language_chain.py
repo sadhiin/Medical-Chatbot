@@ -3,7 +3,8 @@ from transformers import AutoTokenizer
 from auto_gptq import AutoGPTQForCausalLM
 
 from transformers import pipeline, TextStreamer
-from langchain import HuggingFacePipeline, PromptTemplate
+from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+from langchain_core.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 from src.utils import setup_logger
 from src.prompt import generate_prompt
